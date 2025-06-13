@@ -195,7 +195,21 @@ function auto_export_env()
 
 {
 
-	source "./.env" &> "/dev/null" || export $(cat "./.env" &> "/dev/null") &> "/dev/null" # Moving all output into null, bcs otherwise it may violate security of variables
+	env_file_found="false"
+
+	source "./.env" &> "/dev/null" && env_file_found="true" || (export $(cat "./.env" &> "/dev/null") &> "/dev/null" && env_file_found="true") # Moving all output into null, bcs otherwise it may violate security of variables
+
+	if [[ "$env_file_found" != "true" ]]
+
+	then
+
+		throw_notify_message "Not found any .env files! Skipping..."
+
+	else
+
+		skip
+
+	fi
 
 }
 
