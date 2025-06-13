@@ -303,11 +303,11 @@ function swarm_lint_config()
 
 			docker stack config -c "$config_name_auto"
 
-			exit 0
+			exit 1
 
 		else
 
-			docker stack config -c "$config_name_auto" &> "/dev/null" && throw_stage_message "Linting successful!" || (throw_error_message "Linting failed! Use --debug for details" && exit 0)
+			docker stack config -c "$config_name_auto" &> "/dev/null" && throw_stage_message "Linting successful!" || (throw_error_message "Linting failed! Use --debug for details" && exit 1)
 
 		fi
 
@@ -315,7 +315,7 @@ function swarm_lint_config()
 
 		throw_error_message "Config file $config_name_auto does not exists!"
 
-		exit 0
+		exit 1
 
 	fi
 
