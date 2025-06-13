@@ -9,6 +9,7 @@
 # опционально режим дебага средствами bash (set -x -n -u) (пока хз как это реализовывать местными вызовами)
 # не хукается env? (по крайней мере при линте)
 # короче там надо убрать source и оставить export, но проблема экспорта в том, что он дурак и не умеет иногда обрабатывать спец.символы (# например). Решить
+# докер ещё с какого-то хрена или умудряется хукать .env которого нет или запоминает параметры предыдущего (непонятно). UPD: Короче экспорт делается в сессию терминала, поэтому он запомнил
 #
 
 ###############
@@ -162,6 +163,22 @@ function do_show_man()
 {
 
 	cat "$0" | less
+
+}
+
+function do_clean_everything()
+
+{
+
+	docker builder prune -af
+
+	docker container prune -f
+
+	docker image prune -af
+
+	docker system prune -af
+
+	docker volume prune -f
 
 }
 
@@ -645,6 +662,15 @@ do
 
 		"--ls" | "ls")
 		swarm_stack_ls
+		exit 0
+		;;
+
+		#
+		# Parameters for full docker clean up
+		#
+
+		"--clean-everything" "clean-everything")
+		do_clean_everything
 		exit 0
 		;;
 
