@@ -203,7 +203,7 @@ function auto_export_env()
 
 	then
 
-		throw_notify_message "Not found any .env files! Skipping..."
+		throw_notify_message "Not found .env file here! Skipping..."
 
 	else
 
