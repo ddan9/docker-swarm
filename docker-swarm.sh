@@ -276,15 +276,17 @@ function swarm_lint_config()
 
 	auto_do_preparations
 
-	if [[ -n "$config_name" && "$config_name" != "" && "$config_name" != " " && -f "$config_name" ]]
+	config_name_auto=$(auto_define_stack_config "$config_name")
+
+	if [[ -n "$config_name_auto" && "$config_name_auto" != "" && "$config_name_auto" != " " && -f "$config_name_auto" ]]
 
 	then
 
-		docker stack config -c "$config_name" &> "/dev/null" && throw_stage_message "Linting successful!" || throw_error_message "Linting failed!" && exit 0
+		docker stack config -c "$config_name_auto" &> "/dev/null" && throw_stage_message "Linting successful!" || (throw_error_message "Linting failed!" && exit 0)
 
 	else
 
-		throw_error_message "Config file $config_name does not exists!"
+		throw_error_message "Config file $config_name_auto does not exists!"
 
 		exit 0
 
