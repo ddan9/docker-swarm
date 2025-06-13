@@ -17,7 +17,7 @@
 # Script that acts like docker-compose, solving problems and reduces difference in comfortation between docker-compose script and docker swarm basic control
 # Sadly, but some of functionality couldn't be implemented (bcs swarm is about network interaction)
 # Generally, it needs only docker package
-# Currently, there is no man/help, just watch workaround for possible parameters
+# Currently, there is no help, just watch workaround for possible parameters
 #
 
 ##########
@@ -159,9 +159,7 @@ function do_show_man()
 
 {
 
-	MAN="there will be man"
-
-	echo -e "$MAN" | less
+	cat "$0" | less
 
 }
 
@@ -227,7 +225,7 @@ function auto_define_stack_name()
 
 	stack_name_override="$1"
 
-	stack_name_default="$(basename $(pwd))"
+	stack_name_default=$(basename $(pwd))
 
 	stack_name_output="$stack_name_default"
 
@@ -235,7 +233,7 @@ function auto_define_stack_name()
 
 	then
 
-		stack_name_output="$config_name_override"
+		stack_name_output="$stack_name_override"
 
 	else
 
