@@ -8,6 +8,7 @@
 # протестировать всё
 # опционально режим дебага средствами bash (set -x -n -u) (пока хз как это реализовывать местными вызовами)
 # не хукается env? (по крайней мере при линте)
+# короче там надо убрать source и оставить export, но проблема экспорта в том, что он дурак и не умеет иногда обрабатывать спец.символы (# например). Решить
 #
 
 ###############
@@ -194,19 +195,17 @@ function auto_export_env()
 
 {
 
-	env_file_found="false"
-
-	source "./.env" &> "/dev/null" && env_file_found="true" || (export $(cat "./.env" &> "/dev/null") &> "/dev/null" && env_file_found="true") # Moving all output into null, bcs otherwise it may violate security of variables
-
-	if [[ "$env_file_found" != "true" ]]
+	if [[ -f "./.env" ]]
 
 	then
 
-		throw_notify_message "Not found .env file here! Skipping..."
+#		source "./.env" &> "/dev/null"
+
+		export $(cat "./.env") &> "/dev/null" # Moving all output into null, bcs otherwise it may violate security of variables
 
 	else
 
-		skip
+		throw_notify_message "Not found .env file here! Skipping..."
 
 	fi
 
