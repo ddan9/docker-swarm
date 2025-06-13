@@ -293,7 +293,7 @@ function swarm_lint_config()
 
 		else
 
-			docker stack config -c "$config_name_auto" &> "/dev/null" && throw_stage_message "Linting successful!" || (throw_error_message "Linting failed!" && exit 0)
+			docker stack config -c "$config_name_auto" &> "/dev/null" && throw_stage_message "Linting successful!" || (throw_error_message "Linting failed! Use --debug for details" && exit 0)
 
 		fi
 
