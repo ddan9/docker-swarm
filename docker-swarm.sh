@@ -272,7 +272,7 @@ function swarm_lint_config()
 
 {
 
-	$config_name="$1"
+	config_name="$1"
 
 	auto_do_preparations
 
