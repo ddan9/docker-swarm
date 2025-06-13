@@ -196,7 +196,7 @@ function auto_export_env()
 
 {
 
-	source "./.env" &> "/dev/null" || export $(cat "./.env") &> "/dev/null" # Moving all output into null, bcs otherwise it may violate security of variables
+	source "./.env" &> "/dev/null" || export $(cat "./.env" &> "/dev/null") &> "/dev/null" # Moving all output into null, bcs otherwise it may violate security of variables
 
 }
 
@@ -590,6 +590,16 @@ do
 		"--services" | "services" | "--service" | "service")
 		stack_name="$2"
 		swarm_stack_services "$stack_name"
+		exit 0
+		;;
+
+		#
+		# Parameters for lint swarm config file
+		#
+
+		"--lint" | "lint")
+		config_name="$2"
+		swarm_lint_config "$config_name"
 		exit 0
 		;;
 
