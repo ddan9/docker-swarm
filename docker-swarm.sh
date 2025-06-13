@@ -5,9 +5,8 @@
 ########
 
 #
-# намутить рестарт софт
 # протестировать всё
-# опционально режим дебага средствами bash (set -x -n -u)
+# опционально режим дебага средствами bash (set -x -n -u) (пока хз как это реализовывать местными вызовами)
 #
 
 ###############
@@ -274,6 +273,8 @@ function swarm_lint_config()
 
 	config_name="$1"
 
+	config_lint_debug="$2"
+
 	auto_do_preparations
 
 	config_name_auto=$(auto_define_stack_config "$config_name")
@@ -282,7 +283,19 @@ function swarm_lint_config()
 
 	then
 
-		docker stack config -c "$config_name_auto" &> "/dev/null" && throw_stage_message "Linting successful!" || (throw_error_message "Linting failed!" && exit 0)
+		if [[ ( -n "$config_lint_debug" && "$config_lint_debug" != "" && "$config_lint_debug" != " " ) && ( "$config_lint_debug" == "--debug" || "$config_lint_debug" == "debug" ) ]]
+
+		then
+
+			docker stack config -c "$config_name_auto"
+
+			exit 0
+
+		else
+
+			docker stack config -c "$config_name_auto" &> "/dev/null" && throw_stage_message "Linting successful!" || (throw_error_message "Linting failed!" && exit 0)
+
+		fi
 
 	else
 
@@ -599,7 +612,8 @@ do
 
 		"--lint" | "lint")
 		config_name="$2"
-		swarm_lint_config "$config_name"
+		config_lint_debug="$3"
+		swarm_lint_config "$config_name" "$config_lint_debug"
 		exit 0
 		;;
 
