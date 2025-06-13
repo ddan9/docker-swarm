@@ -7,6 +7,7 @@
 #
 # протестировать всё
 # опционально режим дебага средствами bash (set -x -n -u) (пока хз как это реализовывать местными вызовами)
+# не хукается env? (по крайней мере при линте)
 #
 
 ###############
@@ -567,7 +568,7 @@ do
 		# Parameters for up/start/enable/deploy stack
 		#
 
-		"--up" | "up")
+		"--up" | "up" | "--deploy" | "deploy" | "--start" | "start" | "--enable" | "enable" | "--stack-{up,deploy,start,enable}" | "stack-{up,deploy,start,enable}")
 		config_name="$2"
 		stack_name="$3"
 		swarm_stack_up "$config_name" "$stack_name"
@@ -578,7 +579,7 @@ do
 		# Parameters for down/stop/disable/remove stack
 		#
 
-		"--down" | "down")
+		"--down" | "down" | "--remove" | "remove" | "--rm" | "rm" | "--stop" | "stop" | "--disable" | "disable" | "--stack-{down,remove,rm,stop,disable}" | "stack-{down,remove,rm,stop,disable}")
 		stack_name="$2"
 		swarm_stack_down "$stack_name"
 		exit 0
@@ -600,7 +601,7 @@ do
 		# Parameters for restart services in stack
 		#
 
-		"--restart-service" | "restart-service")
+		"--reload" | "reload" | "--restart-service" | "restart-service")
 		restart_service_mode="$2"
 		restart_service_name="$3"
 		restart_service_image="$4"
