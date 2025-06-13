@@ -280,7 +280,7 @@ function swarm_lint_config()
 
 	then
 
-		docker stack config "$config_name" &> "/dev/null" && throw_stage_message "Linting successful!" || throw_error_message "Linting failed!" && exit 0
+		docker stack config -c "$config_name" &> "/dev/null" && throw_stage_message "Linting successful!" || throw_error_message "Linting failed!" && exit 0
 
 	else
 
