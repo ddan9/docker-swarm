@@ -5,11 +5,14 @@
 ########
 
 #
-# протестировать всё
 # опционально режим дебага средствами bash (set -x -n -u) (пока хз как это реализовывать местными вызовами)
-# не хукается env? (по крайней мере при линте)
-# короче там надо убрать source и оставить export, но проблема экспорта в том, что он дурак и не умеет иногда обрабатывать спец.символы (# например). Решить
+# короче там надо убрать source (через него не хукается (по крайней мере глобально, можно попробовать вынести в глобалку (из функции))) и оставить export, но проблема экспорта в том, что он дурак и не умеет иногда обрабатывать спец.символы (# например). Решить
 # докер ещё с какого-то хрена или умудряется хукать .env которого нет или запоминает параметры предыдущего (непонятно). UPD: Короче экспорт делается в сессию терминала, поэтому он запомнил
+# экспорт слегка опасен, т.к. экспортирует переменные в сессию и делает это глобально, желательно использовать source, но надо понять как его завести
+# ADD: --local-ps (local-ps-filter-name) --local-exec --restart-container-local
+# короче нужно глянуть хелпу докера и прям по всему пройтись
+# сделать буквенные ключи (типа -S), чтобы можно было цеплять как глобалку
+# расширить контекст работы restart-service, добавить работу с другими стэками
 #
 
 ###############
@@ -18,6 +21,7 @@
 
 #
 # Script that acts like docker-compose, solving problems and reduces difference in comfortation between docker-compose script and docker swarm basic control
+# Basicly, adds feature of env hook, directory/stack context and couple other small facilities
 # Sadly, but some of functionality couldn't be implemented (bcs swarm is about network interaction)
 # Generally, it needs only docker package
 # Currently, there is no help, just watch workaround for possible parameters
@@ -166,6 +170,14 @@ function do_show_man()
 
 }
 
+#
+# Function for fast docker clean up. May be helpful if you need to clean up your machine
+#
+# Usage: nothing special
+#
+# Outputs: text with output of docker commands
+#
+
 function do_clean_everything()
 
 {
@@ -231,9 +243,9 @@ function auto_export_env()
 #
 # Function for automatic definition of stack name. Uses current directory name as basic, just like docker-compose, may be overriden with new stack name
 #
-# Usage auto_define_stack_config <new_stack_name>
+# Usage: auto_define_stack_config <new_stack_name>
 #
-# Outputs string: final stack name (default basicly current directory name)
+# Outputs: final stack name (string, default - basicly current directory name)
 #
 
 function auto_define_stack_name()
@@ -265,9 +277,9 @@ function auto_define_stack_name()
 #
 # Function for automatic definition of config name. Uses default const variable as default, may be overriden with new file name
 #
-# Usage auto_define_stack_config <new-stack-config.yml>
+# Usage: auto_define_stack_config <new-stack-config.yml>
 #
-# Outputs string: final config name (default basicly "docker-compose.yml")
+# Outputs: final config name (string, default - basicly "docker-compose.yml")
 #
 
 function auto_define_stack_config()
@@ -295,6 +307,14 @@ function auto_define_stack_config()
 	echo "$config_name_output"
 
 }
+
+#
+# Function for lint/check yaml config that will be used. Checks it via internal docker functionality. May be used with --debug parameter (DANGER: use it only on local session (not in pipelines (bcs it may violate security of variables)))
+#
+# Usage: swarm_lint_config <stack-config-name.yml> < --debug | debug >
+#
+# Outputs: formated message of linting status (text)
+#
 
 function swarm_lint_config()
 
@@ -475,6 +495,8 @@ function swarm_stack_restart_full()
 
 	swarm_stack_down
 
+	throw_notify_message "Waiting $STACK_RESTART_COOLDOWN seconds..."
+
 	sleep "$STACK_RESTART_COOLDOWN"
 
 	swarm_stack_up "$config_name" "$stack_name"
@@ -605,7 +627,7 @@ do
 		# Parameters for restart stack
 		#
 
-		"--restart" | "restart" | "--restart-stack" | "restart-stack")
+		"--restart" | "restart" | "--restart-stack" | "restart-stack" | "--rS" | "rS")
 		restart_stack_mode="$2"
 		restart_stack_config="$3"
 		restart_stack_name="$4"
@@ -617,7 +639,7 @@ do
 		# Parameters for restart services in stack
 		#
 
-		"--reload" | "reload" | "--restart-service" | "restart-service")
+		"--reload" | "reload" | "--restart-service" | "restart-service" | "--rs" | "rs")
 		restart_service_mode="$2"
 		restart_service_name="$3"
 		restart_service_image="$4"
@@ -629,7 +651,7 @@ do
 		# Parameters for show/display/watch services in stack
 		#
 
-		"--services" | "services" | "--service" | "service")
+		"--services" | "services" | "--service" | "service" | "-s" | "s")
 		stack_name="$2"
 		swarm_stack_services "$stack_name"
 		exit 0
@@ -639,7 +661,7 @@ do
 		# Parameters for lint swarm config file
 		#
 
-		"--lint" | "lint")
+		"--lint" | "lint" | "--lint-config" | "lint-config" | "--check-config" | "check-config" | "-l" | "l")
 		config_name="$2"
 		config_lint_debug="$3"
 		swarm_lint_config "$config_name" "$config_lint_debug"
@@ -650,7 +672,7 @@ do
 		# Parameters for show/display/watch containers/tasks/processes in stack
 		#
 
-		"--ps" | "ps")
+		"--ps" | "ps" | "--processes" | "processes" | "--stack-processes" | "stack-processes")
 		stack_name="$2"
 		swarm_stack_ps "$stack_name"
 		exit 0
@@ -660,7 +682,7 @@ do
 		# Parameters for show/display/watch list of working stacks
 		#
 
-		"--ls" | "ls")
+		"--ls" | "ls" | "--stacks-list" | "stacks-list" | "--stack-list" | "stack-list" | "-L" | "L")
 		swarm_stack_ls
 		exit 0
 		;;
